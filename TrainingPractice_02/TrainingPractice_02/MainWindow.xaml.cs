@@ -102,10 +102,10 @@ namespace TrainingPractice_02
 
             // Перемешиваем, пока не найдется решаемый вариант
             do Shuffle(arr, _max);
-            while (!IsImpossible(arr, _max));
+            while (!IsPossible(arr, _max));
 
             // Создаём плитки
-            for (int i = 0; i < _max; i++) new Tile(i, arr[i]);
+            for (int i = 0; i < _max; i++) new Tile(arr[i], i);
 
             _steps = 0;     // шаги
             _status = 1;    // статус 1 - сейчас идёт игра
@@ -124,9 +124,14 @@ namespace TrainingPractice_02
         public static void OnTimerTick(object sender, EventArgs e)
         {
             int diff = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _timestamp;
-            int min = diff / 60;
-            int sec = diff - min * 60;
-            _text.Text = $"{min}:{sec.ToString("00")},  шагов: {_steps}";
+            _text.Text = $"{GetReadableTime(diff)},  шагов: {_steps}";
+        }
+
+        // Возвращает читаемое время - из 105 сек в 1:45
+        public static string GetReadableTime(int ts) {
+            int min = ts / 60;
+            int sec = ts - min * 60;
+            return $"{min}:{sec.ToString("00")}";
         }
 
         // Проверка на победу
@@ -138,17 +143,19 @@ namespace TrainingPractice_02
             {
                 _timer.Stop();
                 _status = 2;
+                int diff = (int) DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _timestamp;
 
                 // Пишем рекорд в файл
                 StreamWriter writer = new StreamWriter(_path, true);
-                writer.WriteLine($"{(int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _timestamp} {_steps}");
+                writer.WriteLine($"{diff} {_steps}");
                 writer.Close();
-
+                
                 // Пишем рекорд в список рекордов
-                _records.Add(((int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _timestamp, _steps));
+                _records.Add((diff, _steps));
                 _records.Sort((x, y) => y.ts.CompareTo(x.ts));
 
-                MessageBoxResult res = MessageBox.Show($"Вы собрали пятнашки за {_text.Text}. Сыграть ещё раз?", "Поздравляем!", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
+                _text.Text = "Игра завершена.";
+                MessageBoxResult res = MessageBox.Show($"Вы собрали пятнашки за {GetReadableTime(diff)}, {_steps} шагов. Сыграть ещё раз?", "Поздравляем!", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
                 if (res == MessageBoxResult.Yes) Game();
             }
         }
@@ -177,19 +184,20 @@ namespace TrainingPractice_02
 
         // Проверяет возможность данной комбинации
         // https://technocrator.livejournal.com/45348.html
-        public static bool IsImpossible(int[] arr, int size)
+        public static bool IsPossible(int[] arr, int size)
         {
             int empty = -1; // позиция "пустой" клетки
             int sum = 0;    // сумма
             for (int i = 0; i < size; ++i)
             {
-                if (arr[i] == size) empty = i;
+                if (arr[i] == size - 1) empty = i;
                 for (int j = 0; j < i; ++j) if (arr[j] > arr[i]) ++sum;
             }
             sum += 1 + (empty / 4);
-            return (sum % 2 == 1);
+            if (!(sum % 2 != 0)) Debug.WriteLine($"\nВозможно! Пустая клеточка: {empty}");
+            else Debug.WriteLine($"\nНевозможно! Пустая клеточка: {empty}");
+            return !(sum % 2 != 0);
         }
-        
     }
 
     // Класс плитки является расширением обычной кнопки
@@ -217,7 +225,6 @@ namespace TrainingPractice_02
 
         private void OnClick(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine($"Сейчас: {this.Now}, адрес: {this.Original}");
             if (MainWindow._status != 1) return;
 
             foreach (Tile t in MainWindow._grid.Children)

@@ -55,7 +55,7 @@ namespace TrainingPractice_02
             file.Close();
 
             // Сортируем по скорости (ts). Также можно по количеству шагов (steps)
-            _records.Sort((x, y) => y.ts.CompareTo(x.ts));
+            _records.Sort((y, x) => y.ts.CompareTo(x.ts));
         }
 
         public static void OnHelpClicked(object sender, RoutedEventArgs e)
@@ -152,7 +152,7 @@ namespace TrainingPractice_02
                 
                 // Пишем рекорд в список рекордов
                 _records.Add((diff, _steps));
-                _records.Sort((x, y) => y.ts.CompareTo(x.ts));
+                _records.Sort((y, x) => y.ts.CompareTo(x.ts));
 
                 _text.Text = "Игра завершена.";
                 MessageBoxResult res = MessageBox.Show($"Вы собрали пятнашки за {GetReadableTime(diff)}, {_steps} шагов. Сыграть ещё раз?", "Поздравляем!", MessageBoxButton.YesNo, MessageBoxImage.Exclamation);
@@ -223,8 +223,10 @@ namespace TrainingPractice_02
             MainWindow._grid.Children.Add(this);
         }
 
+        // Нажатие на плитку
         private void OnClick(object sender, RoutedEventArgs e)
         {
+            // Если игра еще не началась или уже окончена, пропускаем действие
             if (MainWindow._status != 1) return;
 
             foreach (Tile t in MainWindow._grid.Children)
@@ -246,6 +248,7 @@ namespace TrainingPractice_02
             }
         }
 
+        // Устанавливает позицию плитки при помощи свойства margin
         public void SetMargin(bool animate)
         {
             if (animate)
@@ -262,11 +265,14 @@ namespace TrainingPractice_02
             }
         }
 
+        // Текущая позиция плитки
         public int Now
         {
             get { return (int) GetValue(NowProperty); }
             set { SetValue(NowProperty, value); }
         }
+
+        // Изначальная позиция плитки, если совпадает с now - плитка стоит правильно
         public int Original
         {
             get { return (int) GetValue(OriginalProperty); }

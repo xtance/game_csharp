@@ -14,7 +14,7 @@ namespace TrainingPractice_02
     public partial class MainWindow : Window
     {
         public static int _row = 4;                  // кол-во плиток в ряду
-        public static int _max = _row*_row;          // всего плиток
+        public static int _max = _row * _row;        // всего плиток
         public static int _side = 150;               // пикселей на плитку
         public static int _status = 0;               // 0 - игра не запущена, 1 - игра идёт, 2 - игра выиграна
         public static int _timestamp = 0;            // время, когда началась игра (unixtime)
@@ -44,7 +44,8 @@ namespace TrainingPractice_02
 
             // Считываем рекорды
             string line;
-            while ((line = file.ReadLine()) != null) {
+            while ((line = file.ReadLine()) != null)
+            {
                 string[] split = line.Split(' ');
                 if (split.Length != 2) continue;
                 int time = Convert.ToInt32(split[0]);
@@ -62,6 +63,7 @@ namespace TrainingPractice_02
         {
             MessageBox.Show("Цель игры 'Пятнашки' - собрать таблицу из идущих подряд чисел от 1 до 15. Пустая ячейка должна оказаться последней. Нажмите на плитку, граничащую с пустой ячейкой, чтобы передвинуть её на свободное место. \n\nИгра создана в рамках учебной практики по C#", "Об игре");
         }
+
         public static void OnRecordsClicked(object sender, RoutedEventArgs e)
         {
             string temp = "";
@@ -71,14 +73,9 @@ namespace TrainingPractice_02
                 int sec = one.ts - min * 60;
                 temp += $"{min}:{sec.ToString("00")} | {one.steps} шагов \n";
             });
-            if (temp != "")
-            {
-                MessageBox.Show(temp, $"Рекордов: {_records.Count}");
-            }
-            else
-            {
-                MessageBox.Show("Рекордов ещё нет.", "Ошибка");
-            }
+
+            if (temp != "") MessageBox.Show(temp, $"Рекордов: {_records.Count}");
+            else MessageBox.Show("Рекордов ещё нет.", "Ошибка");
         }
 
         // Запускает новую игру
@@ -92,7 +89,8 @@ namespace TrainingPractice_02
             else Game();
         }
 
-        public static void Game() {
+        public static void Game()
+        {
             // Удаляем предыдущие кнопки - вдруг они там есть
             _grid.Children.Clear();
 
@@ -109,10 +107,14 @@ namespace TrainingPractice_02
 
             _steps = 0;     // шаги
             _status = 1;    // статус 1 - сейчас идёт игра
-            _timestamp = (int) DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            _timestamp = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             // Таймер
-            if (_timer != null) _timer.Stop();
+            if (_timer != null)
+            {
+                _timer.Stop();
+                _timer.Tick -= OnTimerTick;
+            }
             _timer = new DispatcherTimer();
             _timer.Interval = TimeSpan.FromSeconds(1);
             _timer.Tick += OnTimerTick;
@@ -128,7 +130,8 @@ namespace TrainingPractice_02
         }
 
         // Возвращает читаемое время - из 105 сек в 1:45
-        public static string GetReadableTime(int ts) {
+        public static string GetReadableTime(int ts)
+        {
             int min = ts / 60;
             int sec = ts - min * 60;
             return $"{min}:{sec.ToString("00")}";
@@ -143,13 +146,13 @@ namespace TrainingPractice_02
             {
                 _timer.Stop();
                 _status = 2;
-                int diff = (int) DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _timestamp;
+                int diff = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _timestamp;
 
                 // Пишем рекорд в файл
                 StreamWriter writer = new StreamWriter(_path, true);
                 writer.WriteLine($"{diff} {_steps}");
                 writer.Close();
-                
+
                 // Пишем рекорд в список рекордов
                 _records.Add((diff, _steps));
                 _records.Sort((y, x) => y.ts.CompareTo(x.ts));
@@ -233,10 +236,10 @@ namespace TrainingPractice_02
             {
                 if (t.Original == (MainWindow._max - 1))
                 {
-                    if  (   (this.Now - t.Now == MainWindow._row)   // Вверх
-                        ||  (t.Now - this.Now == MainWindow._row)   // Вниз
-                        ||  (t.Now - this.Now == 1 && this.Now / MainWindow._side == t.Now / MainWindow._side)  // Вправо
-                        ||  (this.Now - t.Now == 1 && this.Now / MainWindow._side == t.Now / MainWindow._side)  // Влево
+                    if ((this.Now - t.Now == MainWindow._row)   // Вверх
+                        || (t.Now - this.Now == MainWindow._row)   // Вниз
+                        || (t.Now - this.Now == 1 && this.Now / MainWindow._side == t.Now / MainWindow._side)  // Вправо
+                        || (this.Now - t.Now == 1 && this.Now / MainWindow._side == t.Now / MainWindow._side)  // Влево
                         )
                     {
                         MainWindow.Swap(this, t);
@@ -268,14 +271,14 @@ namespace TrainingPractice_02
         // Текущая позиция плитки
         public int Now
         {
-            get { return (int) GetValue(NowProperty); }
+            get { return (int)GetValue(NowProperty); }
             set { SetValue(NowProperty, value); }
         }
 
         // Изначальная позиция плитки, если совпадает с now - плитка стоит правильно
         public int Original
         {
-            get { return (int) GetValue(OriginalProperty); }
+            get { return (int)GetValue(OriginalProperty); }
             set { SetValue(OriginalProperty, value); }
         }
 

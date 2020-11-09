@@ -13,16 +13,16 @@ namespace TrainingPractice_02
 {
     public partial class MainWindow : Window
     {
-        public static int _row = 4;                  // кол-во плиток в ряду
-        public static int _max = _row * _row;        // всего плиток
-        public static int _side = 150;               // пикселей на плитку
-        public static int _status = 0;               // 0 - игра не запущена, 1 - игра идёт, 2 - игра выиграна
-        public static int _timestamp = 0;            // время, когда началась игра (unixtime)
-        public static int _steps = 0;                // кол-во шагов
-        public static Grid _grid;                    // контейнер плиток
+        public int _row = 4;                  // кол-во плиток в ряду
+        public int _max = 16;                 // всего плиток
+        public int _side = 150;               // пикселей на плитку
+        public int _status = 0;               // 0 - игра не запущена, 1 - игра идёт, 2 - игра выиграна
+        public int _timestamp = 0;            // время, когда началась игра (unixtime)
+        public int _steps = 0;                // кол-во шагов
+        public Grid _grid;                    // контейнер плиток
         public DispatcherTimer _timer;        // таймер
-        public static TextBlock _text = null;        // блок с текстом
-        public static Random _random = new Random(); // рандом
+        public TextBlock _text = null;        // блок с текстом
+        public Random _random = new Random(); // рандом
 
         // Хранение рекордов
         public static string _path = @"records.txt";
@@ -59,12 +59,12 @@ namespace TrainingPractice_02
             _records.Sort((y, x) => y.ts.CompareTo(x.ts));
         }
 
-        public static void OnHelpClicked(object sender, RoutedEventArgs e)
+        public void OnHelpClicked(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Цель игры 'Пятнашки' - собрать таблицу из идущих подряд чисел от 1 до 15. Пустая ячейка должна оказаться последней. Нажмите на плитку, граничащую с пустой ячейкой, чтобы передвинуть её на свободное место. \n\nИгра создана в рамках учебной практики по C#", "Об игре");
         }
 
-        public static void OnRecordsClicked(object sender, RoutedEventArgs e)
+        public void OnRecordsClicked(object sender, RoutedEventArgs e)
         {
             string temp = "";
             _records.ForEach(one =>
@@ -103,7 +103,7 @@ namespace TrainingPractice_02
             while (!IsPossible(arr, _max));
 
             // Создаём плитки
-            for (int i = 0; i < _max; i++) new Tile(arr[i], i);
+            for (int i = 0; i < _max; i++) new Tile(arr[i], i, this);
 
             _steps = 0;     // шаги
             _status = 1;    // статус 1 - сейчас идёт игра
@@ -124,14 +124,14 @@ namespace TrainingPractice_02
         }
 
         // Таймер, показывает время и шаги
-        public static void OnTimerTick(object sender, EventArgs e)
+        public void OnTimerTick(object sender, EventArgs e)
         {
             int diff = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _timestamp;
             _text.Text = $"{GetReadableTime(diff)},  шагов: {_steps}";
         }
 
         // Возвращает читаемое время - из 105 сек в 1:45
-        public static string GetReadableTime(int ts)
+        public string GetReadableTime(int ts)
         {
             int min = ts / 60;
             int sec = ts - min * 60;
@@ -147,7 +147,7 @@ namespace TrainingPractice_02
             {
                 _timer.Stop();
                 _status = 2;
-                int diff = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _timestamp;
+                int diff = (int) DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _timestamp;
 
                 // Пишем рекорд в файл
                 StreamWriter writer = new StreamWriter(_path, true);
@@ -165,7 +165,7 @@ namespace TrainingPractice_02
         }
 
         // Меняет две плитки местами
-        public static void Swap(Tile tile1, Tile tile2)
+        public void Swap(Tile tile1, Tile tile2)
         {
             int cur = tile1.Now;
             tile1.Now = tile2.Now;
@@ -175,7 +175,7 @@ namespace TrainingPractice_02
         }
 
         // Перемешивает массив
-        public static void Shuffle(int[] arr, int size)
+        public void Shuffle(int[] arr, int size)
         {
             for (int i = size - 1; i > 0; i--)
             {
@@ -184,13 +184,24 @@ namespace TrainingPractice_02
                 arr[j] = arr[i];
                 arr[i] = temp;
             }
+
+            // Костыль чтобы пустая плитка всегда была на последнем месте
+            for (int i = 0; i < size; i++)
+            {
+                if (arr[i] == size - 1)
+                {
+                    int temp = arr[size - 1];
+                    arr[size - 1] = arr[i];
+                    arr[i] = temp;
+                }
+            }
         }
 
         // Проверяет возможность данной комбинации
         // https://technocrator.livejournal.com/45348.html
         public static bool IsPossible(int[] arr, int size)
         {
-            int empty = -1; // позиция "пустой" клетки
+            int empty = -1; // позиция "пустой" клетки. всегда должна быть равна size-1. но мало ли что...
             int sum = 0;    // сумма
             for (int i = 0; i < size; ++i)
             {
@@ -207,45 +218,50 @@ namespace TrainingPractice_02
     // Класс плитки является расширением обычной кнопки
     public class Tile : Button
     {
+        private MainWindow window;
         // Конструктор
-        public Tile(int original, int now)
+        public Tile(int original, int now, MainWindow window)
         {
+            this.window = window;
             this.Original = original;
             this.Now = now;
-            this.Height = this.Width = MainWindow._side;
+            this.Height = this.Width = window._side;
             this.VerticalAlignment = VerticalAlignment.Top;
             this.HorizontalAlignment = HorizontalAlignment.Left;
             this.Click += OnClick;
             this.Content = (this.Original + 1).ToString();
-            this.SetMargin(false);
             this.FontSize = 24;
             this.FontWeight = FontWeights.SemiBold;
             this.Background = new SolidColorBrush(Color.FromRgb(179, 255, 230));
             this.Cursor = Cursors.Hand;
+            this.SetMargin(false);
 
-            if (original == 15) this.Opacity = 0;
-            MainWindow._grid.Children.Add(this);
+            if (original == (window._max-1)) this.Opacity = 0;
+            window._grid.Children.Add(this);
         }
 
         // Нажатие на плитку
         private void OnClick(object sender, RoutedEventArgs e)
         {
             // Если игра еще не началась или уже окончена, пропускаем действие
-            if (MainWindow._status != 1) return;
+            if (window._status != 1) return;
 
-            foreach (Tile t in MainWindow._grid.Children)
+            foreach (Tile t in window._grid.Children)
             {
-                if (t.Original == (MainWindow._max - 1))
+                if (t.Original == (window._max - 1))
                 {
-                    if ((this.Now - t.Now == MainWindow._row)   // Вверх
-                        || (t.Now - this.Now == MainWindow._row)   // Вниз
-                        || (t.Now - this.Now == 1 && this.Now / MainWindow._side == t.Now / MainWindow._side)  // Вправо
-                        || (this.Now - t.Now == 1 && this.Now / MainWindow._side == t.Now / MainWindow._side)  // Влево
+                    // Проверочка
+                    // Debug.WriteLine($"{this.Now} ) {this.Now % window._row} | {this.Now / window._row}");
+
+                    if ((this.Now - t.Now == window._row)   // Вверх
+                        || (t.Now - this.Now == window._row)   // Вниз
+                        || (t.Now - this.Now == 1 && this.Now / window._row == t.Now / window._row)  // Вправо
+                        || (this.Now - t.Now == 1 && this.Now / window._row == t.Now / window._row)  // Влево
                         )
                     {
-                        MainWindow.Swap(this, t);
-                        MainWindow._steps++;
-                        MainWindow.CheckWin();
+                        window.Swap(this, t);
+                        window._steps++;
+                        window.CheckWin();
                     }
                     break;
                 }
@@ -259,13 +275,13 @@ namespace TrainingPractice_02
             {
                 ThicknessAnimation ta = new ThicknessAnimation();
                 ta.From = this.Margin;
-                ta.To = new Thickness((this.Now % MainWindow._row) * MainWindow._side, (this.Now / MainWindow._row) * MainWindow._side, 0, 0);
+                ta.To = new Thickness((this.Now % window._row) * window._side, (this.Now / window._row) * window._side, 0, 0);
                 ta.Duration = new Duration(TimeSpan.FromMilliseconds(250));
                 this.BeginAnimation(Tile.MarginProperty, ta);
             }
             else
             {
-                this.Margin = new Thickness((this.Now % MainWindow._row) * MainWindow._side, (this.Now / MainWindow._row) * MainWindow._side, 0, 0);
+                this.Margin = new Thickness((this.Now % window._row) * window._side, (this.Now / window._row) * window._side, 0, 0);
             }
         }
 

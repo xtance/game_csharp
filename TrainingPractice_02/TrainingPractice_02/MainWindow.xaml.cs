@@ -20,7 +20,7 @@ namespace TrainingPractice_02
         public static int _timestamp = 0;            // время, когда началась игра (unixtime)
         public static int _steps = 0;                // кол-во шагов
         public static Grid _grid;                    // контейнер плиток
-        public static DispatcherTimer _timer;        // таймер
+        public DispatcherTimer _timer;        // таймер
         public static TextBlock _text = null;        // блок с текстом
         public static Random _random = new Random(); // рандом
 
@@ -79,7 +79,7 @@ namespace TrainingPractice_02
         }
 
         // Запускает новую игру
-        public static void OnPlayClicked(object sender, RoutedEventArgs e)
+        public void OnPlayClicked(object sender, RoutedEventArgs e)
         {
             if (_status == 1)
             {
@@ -89,7 +89,7 @@ namespace TrainingPractice_02
             else Game();
         }
 
-        public static void Game()
+        public void Game()
         {
             // Удаляем предыдущие кнопки - вдруг они там есть
             _grid.Children.Clear();
@@ -107,18 +107,19 @@ namespace TrainingPractice_02
 
             _steps = 0;     // шаги
             _status = 1;    // статус 1 - сейчас идёт игра
-            _timestamp = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            _timestamp = (int) DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             // Таймер
-            if (_timer != null)
+            if (_timer == null)
             {
-                _timer.Stop();
-                _timer.Tick -= OnTimerTick;
+                _timer = new DispatcherTimer();
+                _timer.Interval = TimeSpan.FromSeconds(1);
+                _timer.Tick += OnTimerTick;
             }
-            _timer = new DispatcherTimer();
-            _timer.Interval = TimeSpan.FromSeconds(1);
-            _timer.Tick += OnTimerTick;
-            _timer.Start();
+            if (!_timer.IsEnabled)
+            {
+                _timer.Start();
+            }
             OnTimerTick(null, null);
         }
 
@@ -138,7 +139,7 @@ namespace TrainingPractice_02
         }
 
         // Проверка на победу
-        public static void CheckWin()
+        public void CheckWin()
         {
             int count = 0;
             for (int i = 0; i < _max; i++) if (((Tile)_grid.Children[i]).Original == ((Tile)_grid.Children[i]).Now) count++;
@@ -197,9 +198,9 @@ namespace TrainingPractice_02
                 for (int j = 0; j < i; ++j) if (arr[j] > arr[i]) ++sum;
             }
             sum += 1 + (empty / 4);
-            if (!(sum % 2 != 0)) Debug.WriteLine($"\nВозможно! Пустая клеточка: {empty}");
+            if (sum % 2 == 0) Debug.WriteLine($"\nВозможно! Пустая клеточка: {empty}");
             else Debug.WriteLine($"\nНевозможно! Пустая клеточка: {empty}");
-            return !(sum % 2 != 0);
+            return (sum % 2 == 0);
         }
     }
 

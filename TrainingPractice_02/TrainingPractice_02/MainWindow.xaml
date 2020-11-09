@@ -5,8 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TrainingPractice_02"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="Пятнашки"
+        Width="640"
+        ResizeMode="NoResize"
+        SizeToContent="Height">
+    <Grid Height="700">
+        <TextBlock Name="Text1" Margin="0,10,0,0" HorizontalAlignment="Stretch" TextWrapping="Wrap" VerticalAlignment="Top" Width="600" Height="30" Text="..." Background="#FF896060" FontSize="16" TextAlignment="Center"/>
+        <Button Content="Перемешать" HorizontalAlignment="Stretch" Margin="0,50,0,0" VerticalAlignment="Top" Width="600" Height="30"/>
+        <Grid Name="GridTiles" HorizontalAlignment="Stretch" Height="600" Margin="0,90,0,0" VerticalAlignment="Top" Width="600" Background="#FFA4A4A4">
+            
+        </Grid>
     </Grid>
 </Window>

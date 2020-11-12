@@ -21,7 +21,7 @@ namespace TrainingPractice_02
         public int _steps = 0;                // кол-во шагов
         public Grid _grid;                    // контейнер плиток
         public DispatcherTimer _timer;        // таймер
-        public TextBlock _text = null;        // блок с текстом
+        public TextBlock _text = null;        // блок с текстoм
         public Random _random = new Random(); // рандом
 
         // Хранение рекордов

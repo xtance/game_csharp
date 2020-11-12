@@ -59,10 +59,13 @@ namespace TrainingPractice_02
             _records.Sort((y, x) => y.ts.CompareTo(x.ts));
         }
 
+        // Нажатие на кнопку - Об игре
         public void OnHelpClicked(object sender, RoutedEventArgs e)
         {
             MessageBox.Show("Цель игры 'Пятнашки' - собрать таблицу из идущих подряд чисел от 1 до 15. Пустая ячейка должна оказаться последней. Нажмите на плитку, граничащую с пустой ячейкой, чтобы передвинуть её на свободное место. \n\nИгра создана в рамках учебной практики по C#", "Об игре");
         }
+
+        // Нажатие на кнопку - Рекорды
 
         public void OnRecordsClicked(object sender, RoutedEventArgs e)
         {
@@ -78,7 +81,7 @@ namespace TrainingPractice_02
             else MessageBox.Show("Рекордов ещё нет.", "Ошибка");
         }
 
-        // Запускает новую игру
+        // Нажатие на кнопку - Новая игра
         public void OnPlayClicked(object sender, RoutedEventArgs e)
         {
             if (_status == 1)
@@ -88,6 +91,9 @@ namespace TrainingPractice_02
             }
             else Game();
         }
+
+
+        // Запуск новой игры
 
         public void Game()
         {
@@ -185,7 +191,7 @@ namespace TrainingPractice_02
                 arr[i] = temp;
             }
 
-            // Костыль чтобы пустая плитка всегда была на последнем месте
+            // Чтобы пустая плитка всегда была на последнем месте
             for (int i = 0; i < size; i++)
             {
                 if (arr[i] == size - 1)

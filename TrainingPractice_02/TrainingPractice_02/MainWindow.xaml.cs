@@ -250,9 +250,6 @@ namespace TrainingPractice_02
             {
                 if (t.Original == (window._max - 1))
                 {
-                    // Проверочка
-                    // Debug.WriteLine($"{this.Now} ) {this.Now % window._row} | {this.Now / window._row}");
-
                     if ((this.Now - t.Now == window._row)   // Вверх
                         || (t.Now - this.Now == window._row)   // Вниз
                         || (t.Now - this.Now == 1 && this.Now / window._row == t.Now / window._row)  // Вправо

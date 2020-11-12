@@ -15,7 +15,7 @@ namespace TrainingPractice_02
     {
         public int _row = 4;                  // кол-во плиток в ряду
         public int _max = 16;                 // всего плиток
-        public int _side = 150;               // пикселей на плитку
+        public int _side = 100;               // пикселей на плитку
         public int _status = 0;               // 0 - игра не запущена, 1 - игра идёт, 2 - игра выиграна
         public int _timestamp = 0;            // время, когда началась игра (unixtime)
         public int _steps = 0;                // кол-во шагов
